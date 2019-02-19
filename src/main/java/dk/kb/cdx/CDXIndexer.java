@@ -57,15 +57,11 @@ public class CDXIndexer {
      */
     public void index(InputStream warcInputStream, OutputStream outputStream, String warcName) throws IOException {
         ArchiveReader archiveReader = ArchiveReaderFactory.get(warcName, warcInputStream, false);
-        for(ArchiveRecord archiveRecord : archiveReader) {
-            WARCRecord warcRecord = (WARCRecord) archiveRecord;
-            warcSearcher.setCanonicalizer(new IdentityUrlCanonicalizer());
-            CaptureSearchResult captureSearchResult = warcSearcher.adapt(warcRecord);
-            if (captureSearchResult != null) {
-                 outputStream.write(cdxLineCreater.adapt(captureSearchResult).getBytes());
-                 outputStream.write("\n".getBytes());
-            }
-        }
+        List<String> cdxLines = extractCdxLines(archiveReader);
+
+        outputStream.write(String.join("\n", cdxLines).getBytes());
+        outputStream.write("\n".getBytes());
+        outputStream.flush();
     }
 
     /**
@@ -77,8 +73,17 @@ public class CDXIndexer {
     public List<String> indexFile(File warcFile) throws IOException {
         ArchiveReader archiveReader = ArchiveReaderFactory.get(warcFile.getName(), new FileInputStream(warcFile),
                 false);
+        return extractCdxLines(archiveReader);
+    }
+
+    /**
+     * Method for extracting the cdx lines from an ArchiveReader.
+     * @param reader The ArchiveReader which is actively reading an archive file (e.g WARC).
+     * @return The list of CDX index lines for the records of the archive in the reader.
+     */
+    protected List<String> extractCdxLines(ArchiveReader reader) {
         List<String> res = new ArrayList<>();
-        for(ArchiveRecord archiveRecord : archiveReader) {
+        for(ArchiveRecord archiveRecord : reader) {
             WARCRecord warcRecord = (WARCRecord) archiveRecord;
             warcSearcher.setCanonicalizer(new IdentityUrlCanonicalizer());
             CaptureSearchResult captureSearchResult = warcSearcher.adapt(warcRecord);
