@@ -64,6 +64,12 @@ public class CDXIndexer {
         outputStream.flush();
     }
 
+    public List<String> index(InputStream warcInputStream, String warcName) throws IOException {
+        ArchiveReader archiveReader = ArchiveReaderFactory.get(warcName, warcInputStream, false);
+        return extractCdxLines(archiveReader);
+    }
+
+
     /**
      * Create the CDX indexes from an WARC file.
      * @param warcFile The WARC file.
@@ -76,6 +82,8 @@ public class CDXIndexer {
         return extractCdxLines(archiveReader);
     }
 
+
+
     /**
      * Method for extracting the cdx lines from an ArchiveReader.
      * @param reader The ArchiveReader which is actively reading an archive file (e.g WARC).
@@ -86,6 +94,7 @@ public class CDXIndexer {
         for(ArchiveRecord archiveRecord : reader) {
             WARCRecord warcRecord = (WARCRecord) archiveRecord;
             warcSearcher.setCanonicalizer(new IdentityUrlCanonicalizer());
+            //TODO this returns null and prints stack trace on OutOfMemoryError. Bad code.
             CaptureSearchResult captureSearchResult = warcSearcher.adapt(warcRecord);
             if (captureSearchResult != null) {
                 res.add(cdxLineCreater.adapt(captureSearchResult));

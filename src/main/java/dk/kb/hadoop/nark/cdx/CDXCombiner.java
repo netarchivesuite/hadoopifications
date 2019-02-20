@@ -1,7 +1,6 @@
 package dk.kb.hadoop.nark.cdx;
 
 import com.google.common.collect.Lists;
-import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -10,7 +9,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class CDXReduce extends Reducer<Text, Text, Text, Text> {
+//TODO javadoc, note that this retains the key, unlike the reducer
+public class CDXCombiner extends Reducer<Text, Text, Text, Text> {
 
     @Override
     protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
@@ -20,6 +20,6 @@ public class CDXReduce extends Reducer<Text, Text, Text, Text> {
         //Apparently this reverses the list
         valuesString = Lists.reverse(valuesString);
 
-        context.write(null, new Text(String.join("\n",valuesString)));
+        context.write(key, new Text(String.join("\n",valuesString)));
     }
 }

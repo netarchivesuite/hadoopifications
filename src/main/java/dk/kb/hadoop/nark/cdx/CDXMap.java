@@ -1,16 +1,15 @@
 package dk.kb.hadoop.nark.cdx;
 
 import dk.kb.cdx.CDXIndexer;
+import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.IntWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapred.MapReduceBase;
-import org.apache.hadoop.mapred.Mapper;
-import org.apache.hadoop.mapred.OutputCollector;
-import org.apache.hadoop.mapred.Reporter;
+import org.apache.hadoop.mapreduce.Mapper;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 /**
@@ -19,33 +18,33 @@ import java.util.List;
  * The input is a key (not used) and a Text line, which we assume is the path to an WARC file.
  * The output is an exit code (not used), and the generated CDX lines.
  */
-public class CDXMap extends MapReduceBase implements Mapper<LongWritable, Text, Text, IntWritable> {
+public class CDXMap extends Mapper<LongWritable, Text, Text, Text> {
 
     /** The CDX indexer.*/
     private CDXIndexer indexer = new CDXIndexer();
-
-    /** The number one as an IntWritable. */
-    private final static IntWritable one = new IntWritable(1);
 
     /**
      * Mapping method.
      *
      * @param key  The key. Is ignored.
      * @param warcPath The path to the WARC file.
-     * @param outputCollector The output collector, where the results are written.
-     * @param reporter The report.
+     * @param context ??
      * @throws IOException If it fails to generate the CDX indexes.
      */
     @Override
-    public void map(LongWritable key, Text warcPath, OutputCollector<Text, IntWritable> outputCollector, Reporter reporter) throws IOException {
+    protected void map(LongWritable key, Text warcPath, Context context) throws IOException, InterruptedException {
         // reject empty or null warc paths.
-        if(warcPath == null || warcPath.toString().isEmpty()) {
+        if(warcPath == null || warcPath.toString().trim().isEmpty()) {
             return;
         }
 
-        File warcFile = new File(warcPath.toString());
-
-        List<String> cdxIndexes = indexer.indexFile(warcFile);
-        outputCollector.collect(new Text(String.join("\n", cdxIndexes)), one);
+        Path path = new Path(warcPath.toString());
+        try (InputStream in = path.getFileSystem(context.getConfiguration()).open(path)) {
+            List<String> cdxIndexes = indexer.index(in, warcPath.toString());
+            for (String cdxIndex : cdxIndexes) {
+                context.write(warcPath, new Text(cdxIndex));
+            }
+        }
     }
+
 }
