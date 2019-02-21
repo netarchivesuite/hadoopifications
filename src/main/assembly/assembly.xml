@@ -11,7 +11,8 @@
     <dependencySets>
         <dependencySet>
             <unpack>true</unpack> <!-- unpack , then repack the jars -->
-            <useTransitiveDependencies>false</useTransitiveDependencies> <!-- do not pull in any transitive dependencies -->
+            <useTransitiveDependencies>true</useTransitiveDependencies>
+            <scope>runtime</scope>
         </dependencySet>
     </dependencySets>
 </assembly>
