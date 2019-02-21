@@ -1,4 +1,4 @@
-package dk.kb.cdx;
+package dk.kb.hadoop.nark;
 
 import dk.kb.hadoop.nark.CDXJob;
 import org.apache.hadoop.fs.FileUtil;

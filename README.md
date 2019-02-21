@@ -3,7 +3,7 @@ Attempts to create hadoop jobs from other processes
 
 
 ```bash
-hadoop jar cdxtest-1.0-SNAPSHOT-hadoop.jar \
+hadoop jar hadoopifications-1.0-SNAPSHOT-hadoop.jar \
     dk.kb.hadoop.nark.CDXJob \
     inputfile \
     outputFolder

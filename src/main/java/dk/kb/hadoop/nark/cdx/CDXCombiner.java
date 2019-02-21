@@ -10,6 +10,10 @@ import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 //TODO javadoc, note that this retains the key, unlike the reducer
+
+/**
+ * The CDX combiner, which delivers the
+ */
 public class CDXCombiner extends Reducer<Text, Text, Text, Text> {
 
     @Override
