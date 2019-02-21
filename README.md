@@ -1,11 +1,14 @@
 # hadoopifications
-Attempts to create hadoop jobs from other processes
+
+A small hadoop job to create CDX files for NetarchiveSuite
+
+
 
 
 ```bash
 hadoop jar hadoopifications-1.0-SNAPSHOT-hadoop.jar \
     dk.kb.hadoop.nark.CDXJob \
-    inputfile \
+    TEST1_list.txt \
     outputFolder
 ```
 
@@ -23,3 +26,12 @@ hdfs dfs -cat 'outputFolder/part-r-*'
 ```
 
 Run this on the server `dkm_eld@narcana-suite01.statsbiblioteket.dk`. The netarchive files are available on TODO
+
+
+## Generate input file
+
+```bash
+ssh dkm_eld@narcana-suite01.statsbiblioteket.dk
+find  /mnt/netarkiv/ -type f | sed 's|\(.*\)|file://\1|' > TEST1_list.txt
+hdfs dfs -copyFromLocal TEST1_list.txt .
+```
