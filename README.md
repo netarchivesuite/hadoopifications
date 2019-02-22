@@ -3,8 +3,6 @@
 A small hadoop job to create CDX files for NetarchiveSuite
 
 
-
-
 ```bash
 hadoop jar hadoopifications-1.0-SNAPSHOT-hadoop.jar \
     dk.kb.hadoop.nark.CDXJob \
@@ -25,7 +23,7 @@ hdfs dfs -ls outputFolder/
 hdfs dfs -cat 'outputFolder/part-r-*'
 ```
 
-Run this on the server `dkm_eld@narcana-suite01.statsbiblioteket.dk`. The netarchive files are available on TODO
+Run this on the server `dkm_eld@narcana-suite01.statsbiblioteket.dk`. The netarchive files are available on `/mnt/netarkiv/`
 
 
 ## Generate input file

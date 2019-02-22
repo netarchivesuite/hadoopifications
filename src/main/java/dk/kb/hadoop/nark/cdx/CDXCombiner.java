@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-//TODO javadoc, note that this retains the key, unlike the reducer
-
 /**
- * The CDX combiner, which delivers the
+ * The CDX combiner, which writes the key and the joined list of values.
+ * This retains the key, which will be used for the reducer.
  */
 public class CDXCombiner extends Reducer<Text, Text, Text, Text> {
 

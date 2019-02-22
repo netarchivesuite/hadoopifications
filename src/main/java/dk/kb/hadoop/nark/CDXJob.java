@@ -13,6 +13,14 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+/**
+ * Hadoop job for extracting CDX indexes from WARC files.
+ * Takes 2 arguments.
+ * 1. a file where each line is the reference to a WARC file to create CDX indexes from.
+ *  - If run on HDFS, then each file path must have the format 'file://'
+ * 2. a output directory, where the CDX index files are delivered.
+ *  - These output files can easily be concatenated into a single CDX index file, as used by NAS.
+ */
 public class CDXJob extends Configured implements Tool {
 
     public static void main(String ... args) throws Exception {
@@ -20,15 +28,11 @@ public class CDXJob extends Configured implements Tool {
         System.exit(exitCode);
     }
 
-
-
     @Override
     public int run(String ... args) throws Exception {
         Configuration conf = new Configuration();
         Job job = Job.getInstance(conf, this.getClass().getName());
         job.setJarByClass(this.getClass());
-
-
 
         //TODO probably better if we can give it a folder or glob rather than a file of files
         job.setInputFormatClass(NLineInputFormat.class);
@@ -56,7 +60,4 @@ public class CDXJob extends Configured implements Tool {
 
         return job.waitForCompletion(true) ? 0 : 1;
     }
-
-
-
 }

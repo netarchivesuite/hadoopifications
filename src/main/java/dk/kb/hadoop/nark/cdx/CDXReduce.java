@@ -10,6 +10,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
+/**
+ * The CDX reducer, which writes the key and the joined list of values.
+ * This discards the key since it should not be part of the output format.
+ */
 public class CDXReduce extends Reducer<Text, Text, Text, Text> {
 
     @Override
