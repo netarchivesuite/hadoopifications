@@ -1,5 +1,6 @@
 package dk.kb.cdx;
 
+import dk.kb.cdx.utils.WARCBatchFilter;
 import org.archive.io.ArchiveReader;
 import org.archive.io.ArchiveReaderFactory;
 import org.archive.io.ArchiveRecord;
@@ -13,7 +14,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,26 +21,12 @@ import java.util.List;
  * Class for creating CDX indexed from WARC files.
  */
 public class CDXIndexer {
-
-    /**
-     * Runner main method, for extracting the CDX indexes from a WARC file.
-     * Delivers the CDX indexes to standard out.
-     * @param args The list of WARC files to have their CDX indexes extracted.
-     * @throws IOException If if fails to extract the CDX indexes from a file.
-     */
-    public static void main(String[] args) throws IOException {
-        CDXIndexer cdxIndexer = new CDXIndexer();
-        for(String s : args) {
-            File f = new File(s);
-            cdxIndexer.index(new FileInputStream(f), System.out, f.getName());
-        }
-    }
-
-
     /** The warc record searcher.*/
     protected final WARCRecordToSearchResultAdapter warcSearcher;
     /** The CDX line creator, which creates the cdx lines from the warc records.*/
     protected final SearchResultToCDXLineAdapter cdxLineCreater;
+    //private int recordNum = 0;
+    //private int actualLinesWritten = 0;
 
     /** Constructor.*/
     public CDXIndexer() {
@@ -48,21 +34,7 @@ public class CDXIndexer {
         cdxLineCreater = new SearchResultToCDXLineAdapter();
     }
 
-    /**
-     * Index the warc input stream and delivers the CDX lines to the output stream.
-     * @param warcInputStream The input stream for the WARC file.
-     * @param outputStream The output stream, where the CDX lines are delivered.
-     * @param warcName The name of the WARC file.
-     * @throws IOException If it fails to read or write the streams.
-     */
-    public void index(InputStream warcInputStream, OutputStream outputStream, String warcName) throws IOException {
-        ArchiveReader archiveReader = ArchiveReaderFactory.get(warcName, warcInputStream, false);
-        List<String> cdxLines = extractCdxLines(archiveReader);
 
-        outputStream.write(String.join("\n", cdxLines).getBytes());
-        outputStream.write("\n".getBytes());
-        outputStream.flush();
-    }
 
     public List<String> index(InputStream warcInputStream, String warcName) throws IOException {
         ArchiveReader archiveReader = ArchiveReaderFactory.get(warcName, warcInputStream, false);
@@ -83,6 +55,15 @@ public class CDXIndexer {
     }
 
 
+    /**
+     * returns a BatchFilter object which restricts the set of warc records in the archive on which the MapReduce job
+     * is performed. Taken directly from NAS, this is simply hardcoded to exclude non-response/resource records.
+     *
+     * @return A filter telling which records should be indexed.
+     */
+    public WARCBatchFilter getFilter() {
+        return WARCBatchFilter.EXCLUDE_NON_RESPONSE_RESOURCE_RECORDS;
+    }
 
     /**
      * Method for extracting the cdx lines from an ArchiveReader.
@@ -91,12 +72,22 @@ public class CDXIndexer {
      */
     protected List<String> extractCdxLines(ArchiveReader reader) {
         List<String> res = new ArrayList<>();
+
         for(ArchiveRecord archiveRecord : reader) {
+            //recordNum++;
+            //System.out.println("Processing record #" + recordNum);
+            // Add filter for only response headers (can trivially get filter in actual project)
             WARCRecord warcRecord = (WARCRecord) archiveRecord;
+            if (!getFilter().accept(warcRecord)) {
+                //System.out.println("Skipping non response record #" + recordNum);
+                continue;
+            }
             warcSearcher.setCanonicalizer(new IdentityUrlCanonicalizer());
             //TODO this returns null and prints stack trace on OutOfMemoryError. Bad code.
             CaptureSearchResult captureSearchResult = warcSearcher.adapt(warcRecord);
             if (captureSearchResult != null) {
+                //actualLinesWritten++;
+                //System.out.println("Actual cdx lines written: " + actualLinesWritten);
                 res.add(cdxLineCreater.adapt(captureSearchResult));
             }
         }

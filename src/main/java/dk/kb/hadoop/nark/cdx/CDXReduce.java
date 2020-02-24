@@ -1,7 +1,7 @@
 package dk.kb.hadoop.nark.cdx;
 
 import com.google.common.collect.Lists;
-import org.apache.hadoop.io.IntWritable;
+import org.apache.hadoop.io.NullWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
@@ -10,16 +10,22 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class CDXReduce extends Reducer<Text, Text, Text, Text> {
+public class CDXReduce extends Reducer<Text, Text, NullWritable, Text> {
 
     @Override
-    protected void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+    protected void reduce(Text warcPath, Iterable<Text> cdxlines, Context context) throws IOException, InterruptedException {
 
-        List<String> valuesString = StreamSupport.stream(values.spliterator(), false).map(text -> text.toString()).collect(Collectors.toList());
+        List<String> valuesString = StreamSupport.stream(cdxlines.spliterator(), false)
+                .map(text -> text.toString())
+                .collect(Collectors.toList());
 
         //Apparently this reverses the list
         valuesString = Lists.reverse(valuesString);
 
-        context.write(null, new Text(String.join("\n",valuesString)));
+        // Don't write a key to avoid printing an url for each WARC-file in the cdx output
+        Text valueout = new Text(String.join("\n", valuesString));
+
+
+        context.write(NullWritable.get(), valueout);
     }
 }

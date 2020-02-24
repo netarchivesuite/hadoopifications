@@ -1,0 +1,3 @@
+test/resources/input/test.warc.gz
+test/resources/input/fyensdk.warc
+test/resources/input/warcfile_withredirects.warc
