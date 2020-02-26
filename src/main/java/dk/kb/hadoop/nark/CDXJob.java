@@ -12,8 +12,6 @@ import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
-import java.io.File;
-
 public class CDXJob extends Configured implements Tool {
 
     public static void main(String ... args) throws Exception {
@@ -28,9 +26,9 @@ public class CDXJob extends Configured implements Tool {
     @Override
     public int run(String ... args) throws Exception {
         Configuration conf = getConf();
-        conf.set("yarn.resourcemanager.address", "node1:8032");
-        conf.set("mapreduce.framework.name", "yarn");
-        conf.set("fs.defaultFS", "hdfs://node1");
+        //conf.set("yarn.resourcemanager.address", "node1:8032");
+        //conf.set("mapreduce.framework.name", "yarn");
+        //conf.set("fs.defaultFS", "hdfs://node1");
         // None of the below settings make a difference so far
         // Seems the default path to jobhistory logs are in /var/hadoop/mr-history/done/yyyy/mm/dd/*
         //File jar = new File("target/hadoopifications-1.0-SNAPSHOT-hadoop.jar");
@@ -81,7 +79,4 @@ public class CDXJob extends Configured implements Tool {
         job.submit();
         return job.waitForCompletion(true) ? 0 : 1;
     }
-
-
-
 }

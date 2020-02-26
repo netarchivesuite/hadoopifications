@@ -7,7 +7,6 @@
     </formats>
 
     <includeBaseDirectory>false</includeBaseDirectory> <!-- strip the module prefixes -->
-
     <dependencySets>
         <dependencySet>
             <unpack>true</unpack> <!-- unpack , then repack the jars -->

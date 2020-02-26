@@ -6,11 +6,11 @@ A small hadoop job to create CDX files for NetarchiveSuite
 ```bash
 hadoop jar hadoopifications-1.0-SNAPSHOT-hadoop.jar \
     dk.kb.hadoop.nark.CDXJob \
-    TEST1_list.txt \
+    inputfile \
     outputFolder
 ```
 
-`inputfile` is a test file consisting of warc-file addresses. Remember to use the prefix `file://` as the addresses
+`inputfile` is a test file consisting of warc-file addresses separated by newlines. Remember to use the prefix `file://` as the addresses
 are resolved on HDFS per default. This goes both for the `inputfile` and the lines in `inputfile`.
 
 Note that `inputfile` and `outputFolder` must be available on all nodes in the cluster, so it is probably wise to use

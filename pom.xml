@@ -39,7 +39,7 @@
             <groupId>org.apache.hadoop</groupId>
             <artifactId>hadoop-client</artifactId>
             <version>2.7.6</version>
-            <scope>provided</scope>
+            <scope>provided</scope> <!-- change to compile if wanting to run job using java -jar -->
         </dependency>
 
 
@@ -111,6 +111,11 @@
                     <descriptors>
                         <descriptor>src/main/assembly/assembly.xml</descriptor>
                     </descriptors>
+                    <archive>
+                        <manifest>
+                            <mainClass>dk.kb.hadoop.nark.CDXJob</mainClass>
+                        </manifest>
+                    </archive>
                 </configuration>
                 <executions>
                     <execution>
