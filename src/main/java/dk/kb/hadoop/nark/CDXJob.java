@@ -9,13 +9,36 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Job;
 import org.apache.hadoop.mapreduce.lib.input.NLineInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
+
+import java.security.PrivilegedAction;
+import java.security.PrivilegedExceptionAction;
 
 public class CDXJob extends Configured implements Tool {
 
     public static void main(String ... args) throws Exception {
-        int exitCode = ToolRunner.run(new CDXJob(new Configuration()), args);
+        Configuration conf = new Configuration();
+        conf.set("yarn.resourcemanager.address", "node1:8032");
+        conf.set("mapreduce.framework.name", "yarn");
+        conf.set("fs.defaultFS", "hdfs://node1");
+        conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName()); // VM Hadoop crashes without this..
+        conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+        /*
+        UserGroupInformation ugi = UserGroupInformation.createRemoteUser("vagrant");
+        ugi.doAs((PrivilegedAction<Void>) () -> {
+            int exitCode = 0;
+            try {
+                exitCode = ToolRunner.run(new CDXJob(conf), args);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.exit(exitCode); // Hmmmm
+            return null;
+        });
+         */
+        int exitCode = ToolRunner.run(new CDXJob(conf), args);
         System.exit(exitCode);
     }
 
@@ -26,18 +49,6 @@ public class CDXJob extends Configured implements Tool {
     @Override
     public int run(String ... args) throws Exception {
         Configuration conf = getConf();
-        conf.set("yarn.resourcemanager.address", "node1:8032");
-        conf.set("mapreduce.framework.name", "yarn");
-        conf.set("fs.defaultFS", "hdfs://node1");
-        conf.set("fs.hdfs.impl", "org.apache.hadoop.hdfs.DistributedFileSystem"); // VM Hadoop crashes without this..
-        // None of the below settings make a difference so far
-        // Seems the default path to jobhistory logs are in /var/hadoop/mr-history/done/yyyy/mm/dd/*
-        //File jar = new File("target/hadoopifications-1.0-SNAPSHOT-hadoop.jar");
-        //conf.set("mapreduce.job.jar", jar.getAbsolutePath());
-        //conf.set("mapreduce.jobhistory.webapp.https.address", "node1:19888");
-        //conf.set("mapreduce.jobhistory.webapp.address", "node1:19888"); // Seems by default that this is port 10020, but this makes the url to track the job redirect to this IPC port instead of the UI on 19888
-        //conf.set("mapreduce.jobhistory.done-dir", "hdfs://node1:8020/tmp/hadoop-yarn/staging/history/done");
-        //conf.set("mapreduce.jobhistory.intermediate-done-dir", "/tmp/hadoop-yarn/staging/history/done_intermediate");
         Job job = Job.getInstance(conf, this.getClass().getName());
         job.setJarByClass(this.getClass());
 

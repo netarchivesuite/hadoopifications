@@ -9,16 +9,23 @@ import java.io.*;
 public class MROutputGetter {
     public static void main(String[] args) throws Exception {
         Configuration conf = new Configuration();
+        conf.set("yarn.resourcemanager.address", "node1:8032");
+        conf.set("mapreduce.framework.name", "yarn");
+        conf.set("fs.defaultFS", "hdfs://node1");
+        MROutputGetter getter = new MROutputGetter();
+        getter.readStuff(new Path(args[1]), conf);
+        /*
         int exitCode = ToolRunner.run(new CDXJob(conf), args);
         if (exitCode == 0) {
             MROutputGetter getter = new MROutputGetter();
-            getter.makeFolderFromOutput(new Path(args[1]), conf, true);
+            //getter.makeFolderFromOutput(new Path(args[1]), conf, true);
             // There is no 'done' folder in hdfs because something is wrong...
             //getter.makeFolderFromOutput(new Path("hdfs://node1:8020/tmp/hadoop-yarn/staging/history/done"), conf, false);
             //getter.readStuff(new Path(args[1]), conf);
         } else {
             System.out.println("Something went wrong...");
         }
+        */
     }
 
     /**
@@ -31,7 +38,8 @@ public class MROutputGetter {
     public void readStuff(Path path, Configuration conf) throws IOException {
         FileSystem fs = FileSystem.get(conf);
         // Only want output of mapping
-        FileStatus[] statuses = fs.listStatus(path, filePath -> filePath.toString().contains("part-"));
+        //FileStatus[] statuses = fs.listStatus(path, filePath -> filePath.toString().contains("part-"));
+        FileStatus[] statuses = fs.listStatus(path);
         for (FileStatus status : statuses) {
             FSDataInputStream fis = fs.open(status.getPath());
             try (BufferedReader reader = new BufferedReader(new InputStreamReader(fis))){

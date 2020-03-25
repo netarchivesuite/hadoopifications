@@ -1,3 +1,3 @@
-src/test/resources/input/test.warc.gz
-src/test/resources/input/fyensdk.warc
-src/test/resources/input/warcfile_withredirects.warc
+file:///home/vagrant/input/test.warc.gz
+file:///home/vagrant/input/fyensdk.warc
+file:///home/vagrant/input/warcfile_withredirects.warc
