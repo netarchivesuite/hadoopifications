@@ -55,7 +55,6 @@ public class CDXJob extends Configured implements Tool {
         /* //TODO (jolf/abr) probably better if we can give it a folder or glob rather than a file of files
         // The below code does this, but adds one new line too much - should use an iterator instead of for-each
         // when iterating to check for last element.
-        job.setInputFormatClass(NLineInputFormat.class);
         File input = File.createTempFile("input", ".tmp");
         input.deleteOnExit();
         BufferedWriter writer = new BufferedWriter(new FileWriter(input));
@@ -67,6 +66,7 @@ public class CDXJob extends Configured implements Tool {
         }
         writer.close();
         NLineInputFormat.addInputPath(job, new Path(input.toPath().toString())); */
+        job.setInputFormatClass(NLineInputFormat.class);
         NLineInputFormat.addInputPath(job, new Path(args[0]));
         NLineInputFormat.setNumLinesPerSplit(job, 5);
 
